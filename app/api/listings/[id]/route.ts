@@ -1,153 +1,200 @@
-import { NextRequest, NextResponse } from "next/server";
-import mongoose from "mongoose";
-import { connectDB } from "@/lib/connectDB";
-import Listing from "@/models/Listing";
-import BorrowRequest from "@/models/BorrowRequest";
-import { apiSuccess, apiError } from "@/lib/utils";
+import { NextRequest, NextResponse } from "next/server"
+import mongoose from "mongoose"
+import { connectDB } from "@/lib/connectDB"
+import Listing from "@/models/Listing"
+import BorrowRequest from "@/models/BorrowRequest"
+import { apiSuccess, apiError } from "@/lib/utils"
 
-// ─── GET /api/listings/[id] ───────────────────────────────────────────────────
-// Public. Increments view count.
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!mongoose.isValidObjectId(params.id)) {
-      return NextResponse.json(apiError("Invalid listing ID"), { status: 400 });
+    const { id } = await params
+
+    if (!mongoose.isValidObjectId(id)) {
+      return NextResponse.json(
+        apiError("Invalid listing ID"),
+        { status: 400 }
+      )
     }
 
-    await connectDB();
+    await connectDB()
 
     const listing = await Listing.findByIdAndUpdate(
-      params.id,
+      id,
       { $inc: { viewCount: 1 } },
-      { new: true }
+      { returnDocument: "after" }
     )
       .populate("owner", "name phone location avatarUrl createdAt")
-      .lean();
+      .lean()
 
     if (!listing) {
-      return NextResponse.json(apiError("Listing not found"), { status: 404 });
+      return NextResponse.json(
+        apiError("Listing not found"),
+        { status: 404 }
+      )
     }
 
-    return NextResponse.json(apiSuccess(listing));
+    return NextResponse.json(apiSuccess(listing))
   } catch (err) {
-    console.error("[GET /api/listings/[id]]", err);
-    return NextResponse.json(apiError("Failed to fetch listing"), {
-      status: 500,
-    });
+    console.error("[GET /api/listings/[id]]", err)
+    return NextResponse.json(
+      apiError("Failed to fetch listing"),
+      { status: 500 }
+    )
   }
 }
 
-// ─── PATCH /api/listings/[id] ─────────────────────────────────────────────────
-// Protected. Only the owner can update their listing.
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const ownerId = req.headers.get("x-user-id");
+    const { id }    = await params
+    const ownerId   = req.headers.get("x-user-id")
+
     if (!ownerId) {
-      return NextResponse.json(apiError("Unauthorized"), { status: 401 });
+      return NextResponse.json(
+        apiError("Unauthorized"),
+        { status: 401 }
+      )
     }
 
-    if (!mongoose.isValidObjectId(params.id)) {
-      return NextResponse.json(apiError("Invalid listing ID"), { status: 400 });
+    if (!mongoose.isValidObjectId(id)) {
+      return NextResponse.json(
+        apiError("Invalid listing ID"),
+        { status: 400 }
+      )
     }
 
-    await connectDB();
+    await connectDB()
 
-    const listing = await Listing.findById(params.id);
+    const listing = await Listing.findById(id)
     if (!listing) {
-      return NextResponse.json(apiError("Listing not found"), { status: 404 });
+      return NextResponse.json(
+        apiError("Listing not found"),
+        { status: 404 }
+      )
     }
 
-    // Ownership check
     if (listing.owner.toString() !== ownerId) {
-      return NextResponse.json(apiError("Forbidden — not your listing"), {
-        status: 403,
-      });
+      return NextResponse.json(
+        apiError("Forbidden — you do not own this listing"),
+        { status: 403 }
+      )
     }
 
-    const body = await req.json();
+    const body = await req.json()
 
-    // Whitelist updatable fields — owner & _id can never be changed
-    const ALLOWED = [
-      "title", "description", "category", "bloodGroup",
-      "quantity", "unit", "condition", "status",
-      "isUrgent", "images", "location",
-      "availableFrom", "availableTill", "tags",
-    ];
+    const ALLOWED_FIELDS = [
+      "title",
+      "description",
+      "category",
+      "bloodGroup",
+      "quantity",
+      "unit",
+      "condition",
+      "status",
+      "isUrgent",
+      "images",
+      "location",
+      "availableFrom",
+      "availableTill",
+      "tags",
+    ]
 
-    const updates: Record<string, any> = {};
-    for (const key of ALLOWED) {
-      if (key in body) updates[key] = body[key];
+    const updates: Record<string, any> = {}
+    for (const key of ALLOWED_FIELDS) {
+      if (key in body) updates[key] = body[key]
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json(
+        apiError("No valid fields provided to update"),
+        { status: 400 }
+      )
     }
 
     const updated = await Listing.findByIdAndUpdate(
-      params.id,
+      id,
       { $set: updates },
-      { new: true, runValidators: true }
-    ).lean();
+      { returnDocument: "after", runValidators: true }
+    ).lean()
 
-    return NextResponse.json(apiSuccess(updated, "Listing updated"));
+    return NextResponse.json(
+      apiSuccess(updated, "Listing updated successfully")
+    )
   } catch (err) {
-    console.error("[PATCH /api/listings/[id]]", err);
-    return NextResponse.json(apiError("Failed to update listing"), {
-      status: 500,
-    });
+    console.error("[PATCH /api/listings/[id]]", err)
+    return NextResponse.json(
+      apiError("Failed to update listing"),
+      { status: 500 }
+    )
   }
 }
 
-// ─── DELETE /api/listings/[id] ────────────────────────────────────────────────
-// Protected. Only owner can delete. Blocks delete if active borrow requests exist.
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const ownerId = req.headers.get("x-user-id");
+    const { id }  = await params
+    const ownerId = req.headers.get("x-user-id")
+
     if (!ownerId) {
-      return NextResponse.json(apiError("Unauthorized"), { status: 401 });
+      return NextResponse.json(
+        apiError("Unauthorized"),
+        { status: 401 }
+      )
     }
 
-    if (!mongoose.isValidObjectId(params.id)) {
-      return NextResponse.json(apiError("Invalid listing ID"), { status: 400 });
+    if (!mongoose.isValidObjectId(id)) {
+      return NextResponse.json(
+        apiError("Invalid listing ID"),
+        { status: 400 }
+      )
     }
 
-    await connectDB();
+    await connectDB()
 
-    const listing = await Listing.findById(params.id);
+    const listing = await Listing.findById(id)
     if (!listing) {
-      return NextResponse.json(apiError("Listing not found"), { status: 404 });
+      return NextResponse.json(
+        apiError("Listing not found"),
+        { status: 404 }
+      )
     }
 
     if (listing.owner.toString() !== ownerId) {
-      return NextResponse.json(apiError("Forbidden — not your listing"), {
-        status: 403,
-      });
+      return NextResponse.json(
+        apiError("Forbidden — you do not own this listing"),
+        { status: 403 }
+      )
     }
 
-    // Block deletion if there are active/approved borrow requests
     const activeRequest = await BorrowRequest.findOne({
-      listing: params.id,
-      status: { $in: ["pending", "approved", "active"] },
-    });
+      listing: id,
+      status:  { $in: ["pending", "approved", "active"] },
+    })
 
     if (activeRequest) {
       return NextResponse.json(
-        apiError("Cannot delete — there are active borrow requests on this listing"),
+        apiError("Cannot delete — this listing has active borrow requests. Resolve them first."),
         { status: 409 }
-      );
+      )
     }
 
-    await Listing.findByIdAndDelete(params.id);
+    await Listing.findByIdAndDelete(id)
 
-    return NextResponse.json(apiSuccess(null, "Listing deleted successfully"));
+    return NextResponse.json(
+      apiSuccess(null, "Listing deleted successfully")
+    )
   } catch (err) {
-    console.error("[DELETE /api/listings/[id]]", err);
-    return NextResponse.json(apiError("Failed to delete listing"), {
-      status: 500,
-    });
+    console.error("[DELETE /api/listings/[id]]", err)
+    return NextResponse.json(
+      apiError("Failed to delete listing"),
+      { status: 500 }
+    )
   }
 }

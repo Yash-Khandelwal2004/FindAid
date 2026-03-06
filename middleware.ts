@@ -1,28 +1,36 @@
-import { getToken } from "next-auth/jwt";
-import { NextRequest,NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt"
+import { NextRequest, NextResponse } from "next/server"
+import { jwtVerify } from "jose"
 
-// Pages that require login — redirect to /login if not authenticated
-const PROTECTED_PAGES = ["/dashboard", "/listings/new"]
-
-// API routes where only POST, PATCH, DELETE need login (GET is public)
+const PROTECTED_PAGES    = ["/dashboard", "/listings/new"]
 const PROTECTED_API_WRITE = ["/api/listings"]
+const PROTECTED_API_ALL  = ["/api/requests"]
+const AUTH_PAGES         = ["/login", "/register"]
 
-// API routes where ALL methods need login
-const PROTECTED_API_ALL = ["/api/requests"]
+export async function middleware(req: NextRequest) {
 
-// Pages to redirect AWAY from if already logged in
-const AUTH_PAGES = ["/login", "/register"]
-
-
-export async function middleware(req:NextRequest){
-
-  const token=await getToken({
+  // ── Read token from NextAuth cookie or Bearer header ───────────────
+  let token = await getToken({
     req,
-    secret:process.env.NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET,
   })
 
-  const {pathname} =req.nextUrl
-  const isLoggedIn= !!token
+  if (!token) {
+    const authHeader = req.headers.get("authorization")
+    if (authHeader?.startsWith("Bearer ")) {
+      try {
+        const rawToken     = authHeader.split(" ")[1]
+        const secret       = new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
+        const { payload }  = await jwtVerify(rawToken, secret)
+        token              = payload as any
+      } catch {
+        // Invalid token — treat as not logged in
+      }
+    }
+  }
+
+  const { pathname } = req.nextUrl
+  const isLoggedIn   = !!token
 
   // ── 1. Protect pages ───────────────────────────────────────────────
   const isProtectedPage = PROTECTED_PAGES.some((path) =>
@@ -35,6 +43,7 @@ export async function middleware(req:NextRequest){
     return NextResponse.redirect(loginUrl)
   }
 
+  // ── 2. Redirect logged in users away from auth pages ───────────────
   if (isLoggedIn && AUTH_PAGES.includes(pathname)) {
     return NextResponse.redirect(new URL("/dashboard", req.url))
   }
@@ -63,11 +72,16 @@ export async function middleware(req:NextRequest){
     )
   }
 
-  // ── 5. Inject user ID header (the proxy part) ──────────────────────
-  if (isLoggedIn && token.id) {
+  // ── 5. Inject user ID header ───────────────────────────────────────
+  // token.id  → from our custom signin route
+  // token.sub → from NextAuth getToken()
+  // check both so either signin method works
+  const userId = (token?.id ?? token?.sub) as string | undefined
+
+  if (isLoggedIn && userId) {
     const requestHeaders = new Headers(req.headers)
-    requestHeaders.set("x-user-id",    token.id as string)
-    requestHeaders.set("x-user-email", token.email as string)
+    requestHeaders.set("x-user-id",    userId)
+    requestHeaders.set("x-user-email", (token?.email ?? "") as string)
 
     return NextResponse.next({
       request: { headers: requestHeaders }
@@ -75,9 +89,7 @@ export async function middleware(req:NextRequest){
   }
 
   return NextResponse.next()
-
 }
-
 
 export const config = {
   matcher: [
