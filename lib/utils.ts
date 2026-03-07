@@ -1,12 +1,10 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
-// ── Tailwind class merger ─────────────────────────────────────────────
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// ── API response helpers ──────────────────────────────────────────────
 export function apiSuccess<T>(data: T, message?: string) {
   return {
     success: true as const,
@@ -22,7 +20,6 @@ export function apiError(error: string) {
   }
 }
 
-// ── Pagination ────────────────────────────────────────────────────────
 export function getPagination(searchParams: URLSearchParams) {
   const page  = Math.max(1,  parseInt(searchParams.get("page")  ?? "1"))
   const limit = Math.min(50, parseInt(searchParams.get("limit") ?? "12"))
@@ -30,7 +27,6 @@ export function getPagination(searchParams: URLSearchParams) {
   return { page, limit, skip }
 }
 
-// ── Date helpers ──────────────────────────────────────────────────────
 export function formatDate(date: string | Date): string {
   return new Date(date).toLocaleDateString("en-IN", {
     day:   "numeric",
@@ -51,7 +47,6 @@ export function formatRelativeTime(date: string | Date): string {
   return formatDate(date)
 }
 
-// ── String helpers ────────────────────────────────────────────────────
 export function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 }

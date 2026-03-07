@@ -12,19 +12,16 @@ import { toast } from "sonner"
 export default function LoginPage() {
   const router = useRouter()
 
-  // Form fields
   const [email,     setEmail]     = useState("")
   const [password,  setPassword]  = useState("")
   const [showPass,  setShowPass]  = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  // Field-level errors
   const [errors, setErrors] = useState<{
     email?:    string
     password?: string
   }>({})
 
-  // ── Validate ────────────────────────────────────────────────────────
   function validate() {
     const e: typeof errors = {}
 
@@ -42,7 +39,6 @@ export default function LoginPage() {
     return Object.keys(e).length === 0
   }
 
-  // ── Submit ──────────────────────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!validate()) return
@@ -61,7 +57,6 @@ export default function LoginPage() {
         return
       }
 
-      // Save token and user to localStorage
       localStorage.setItem("token", json.data.token)
       localStorage.setItem("user",  JSON.stringify(json.data.user))
 

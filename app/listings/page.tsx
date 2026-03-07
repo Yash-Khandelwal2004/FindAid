@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import ListingCard from "@/components/listing/ListingCard"
 
-// Aid categories for filter buttons
 const CATEGORIES = [
   { value: "",           label: "All"         },
   { value: "blood",      label: "Blood"       },
@@ -21,25 +20,21 @@ const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
 
 export default function ListingsPage() {
 
-  // Filter state
   const [search,     setSearch]     = useState("")
   const [category,   setCategory]   = useState("")
   const [bloodGroup, setBloodGroup] = useState("")
   const [city,       setCity]       = useState("")
   const [isUrgent,   setIsUrgent]   = useState(false)
 
-  // Data state
   const [listings,   setListings]   = useState<any[]>([])
   const [total,      setTotal]      = useState(0)
   const [page,       setPage]       = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading,  setIsLoading]  = useState(true)
 
-  // ── Fetch listings ─────────────────────────────────────────────────
   const fetchListings = useCallback(async (currentPage = 1) => {
     setIsLoading(true)
     try {
-      // Build query string from active filters
       const params = new URLSearchParams()
       if (search)     params.set("search",     search)
       if (category)   params.set("category",   category)
@@ -65,12 +60,10 @@ export default function ListingsPage() {
     }
   }, [search, category, bloodGroup, city, isUrgent])
 
-  // Refetch when filters change — reset to page 1
   useEffect(() => {
     fetchListings(1)
   }, [fetchListings])
 
-  // ── Clear all filters ──────────────────────────────────────────────
   function clearFilters() {
     setSearch("")
     setCategory("")

@@ -10,10 +10,8 @@ if (!process.env.NEXTAUTH_SECRET) {
 
 export const authOptions: NextAuthOptions = {
 
-  // Use JWT — no session table needed in MongoDB
   session: { strategy: "jwt" },
 
-  // Where to send users when auth is needed
   pages: {
     signIn: "/login",
     error:  "/login",
@@ -29,26 +27,21 @@ export const authOptions: NextAuthOptions = {
 
       async authorize(credentials) {
 
-        // Basic check — both fields must exist
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Email and password are required")
         }
 
         await connectDB()
 
-        // Find user by email
         const user = await User.findOne({
           email: credentials.email.toLowerCase(),
         }).lean()
 
-        // .lean() returns a plain JS object instead of a Mongoose document
-        // faster and lighter when you don't need Mongoose methods
-
+      
         if (!user) {
           throw new Error("No account found with this email")
         }
 
-        // Compare submitted password against stored hash
         const isValid = await bcrypt.compare(
           credentials.password,
           user.passwordHash
@@ -58,7 +51,6 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Incorrect password")
         }
 
-        // Return this shape — available in jwt() callback as `user`
         return {
           id:    user._id.toString(),
           name:  user.name,
@@ -73,7 +65,6 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
 
     async jwt({ token, user }) {
-      // `user` only exists on first sign in — not on subsequent requests
       if (user) {
         token.id    = user.id
         token.city  = (user as any).city

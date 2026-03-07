@@ -23,7 +23,6 @@ export default function RegisterPage() {
   const [showPass, setShowPass] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  // Field errors
   const [errors, setErrors] = useState<{
     name?:     string
     email?:    string
@@ -34,7 +33,6 @@ export default function RegisterPage() {
     confirm?:  string
   }>({})
 
-  // ── Validate ──────────────────────────────────────────────────────
   function validate() {
     const e: typeof errors = {}
 
@@ -66,7 +64,6 @@ export default function RegisterPage() {
     return Object.keys(e).length === 0
   }
 
-  // ── Submit ────────────────────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!validate()) return
@@ -104,7 +101,6 @@ export default function RegisterPage() {
     }
   }
 
-  // ── Helper to clear a field error on change ───────────────────────
   function clearError(field: keyof typeof errors) {
     if (errors[field]) setErrors({ ...errors, [field]: undefined })
   }

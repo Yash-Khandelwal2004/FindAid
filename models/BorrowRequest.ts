@@ -3,18 +3,18 @@ import { RequestStatus, UrgencyLevel, PreferredContact } from "@/types"
 
 export interface IBorrowRequest extends Document {
   _id: mongoose.Types.ObjectId
-  listing: mongoose.Types.ObjectId    // ref: Listing
-  requester: mongoose.Types.ObjectId  // ref: User (person who wants to borrow)
-  owner: mongoose.Types.ObjectId      // ref: User (person who posted listing)
+  listing: mongoose.Types.ObjectId    
+  requester: mongoose.Types.ObjectId  
+  owner: mongoose.Types.ObjectId     
   quantityRequested: number
   status: RequestStatus
-  message: string                     // requester explains their need
-  ownerNote?: string                  // owner's response note
+  message: string                     
+  ownerNote?: string                 
   urgencyLevel: UrgencyLevel
-  needByDate?: Date                   // when requester needs it
-  returnByDate?: Date                 // agreed return date
-  handedOverAt?: Date                 // when owner gave it
-  returnedAt?: Date                   // when requester returned it
+  needByDate?: Date                  
+  returnByDate?: Date                
+  handedOverAt?: Date                 
+  returnedAt?: Date                   
   requesterContact: {
     phone: string
     preferredContact: PreferredContact
@@ -69,10 +69,9 @@ const BorrowRequestSchema = new Schema<IBorrowRequest>(
   { timestamps: true }
 )
 
-// Indexes — optimized for the 3 most common dashboard queries
-BorrowRequestSchema.index({ listing: 1, status: 1 })    // "all requests on this listing"
-BorrowRequestSchema.index({ requester: 1, status: 1 })  // "all requests I made"
-BorrowRequestSchema.index({ owner: 1, status: 1 })      // "all requests on my listings"
+BorrowRequestSchema.index({ listing: 1, status: 1 })   
+BorrowRequestSchema.index({ requester: 1, status: 1 })  
+BorrowRequestSchema.index({ owner: 1, status: 1 })     
 
 export default mongoose.models.BorrowRequest ||
   mongoose.model<IBorrowRequest>("BorrowRequest", BorrowRequestSchema)

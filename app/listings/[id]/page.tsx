@@ -36,7 +36,6 @@ export default function ListingDetailPage() {
   const [isLoading,  setIsLoading]  = useState(true)
   const [showBorrow, setShowBorrow] = useState(false)
 
-  // ── Fetch listing ──────────────────────────────────────────────────
   useEffect(() => {
     async function fetchListing() {
       try {
@@ -61,7 +60,6 @@ export default function ListingDetailPage() {
     if (params.id) fetchListing()
   }, [params.id])
 
-  // ── Loading state ──────────────────────────────────────────────────
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -93,7 +91,7 @@ export default function ListingDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* ── Main content ─────────────────────────────────────────── */}
+        {/* ── Main content */}
         <div className="lg:col-span-2 space-y-6">
 
           {/* Header card */}

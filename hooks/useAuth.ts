@@ -27,7 +27,6 @@ export function useAuth(): UseAuthReturn {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Read from localStorage on mount
     const storedToken = localStorage.getItem("token")
     const storedUser  = localStorage.getItem("user")
 
@@ -36,7 +35,6 @@ export function useAuth(): UseAuthReturn {
         setToken(storedToken)
         setUser(JSON.parse(storedUser))
       } catch {
-        // Corrupted data — clear it
         localStorage.removeItem("token")
         localStorage.removeItem("user")
       }
