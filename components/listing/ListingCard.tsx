@@ -1,53 +1,52 @@
-import Link from "next/link"
-import { MapPin, Clock, AlertCircle } from "lucide-react"
-import { formatRelativeTime } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
+import Link from "next/link";
+import { MapPin, Clock, AlertCircle } from "lucide-react";
+import { formatRelativeTime } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
- 
 const CATEGORY_LABELS: Record<string, string> = {
-  blood:       "Blood",
-  oxygen:      "Oxygen",
-  wheelchair:  "Wheelchair",
-  medicine:    "Medicine",
-  equipment:   "Equipment",
-  other:       "Other",
-}
+  blood: "Blood",
+  oxygen: "Oxygen",
+  wheelchair: "Wheelchair",
+  medicine: "Medicine",
+  equipment: "Equipment",
+  other: "Other",
+};
 
 const CATEGORY_COLORS: Record<string, string> = {
-  blood:       "bg-red-500/10 text-red-400 border-red-500/20",
-  oxygen:      "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  wheelchair:  "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  medicine:    "bg-green-500/10 text-green-400 border-green-500/20",
-  equipment:   "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  other:       "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
-}
+  blood: "bg-red-500/10 text-red-400 border-red-500/20",
+  oxygen: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  wheelchair: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  medicine: "bg-green-500/10 text-green-400 border-green-500/20",
+  equipment: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+  other: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+};
 
 const STATUS_COLORS: Record<string, string> = {
-  available:   "bg-green-500/10 text-green-400",
-  borrowed:    "bg-yellow-500/10 text-yellow-400",
+  available: "bg-green-500/10 text-green-400",
+  borrowed: "bg-yellow-500/10 text-yellow-400",
   unavailable: "bg-zinc-500/10 text-zinc-400",
-}
+};
 
 interface ListingCardProps {
   listing: {
-    _id:       string
-    title:     string
-    category:  string
-    bloodGroup?: string
-    condition: string
-    status:    string
-    isUrgent:  boolean
-    quantity:  number
-    unit:      string
+    _id: string;
+    title: string;
+    category: string;
+    bloodGroup?: string;
+    condition: string;
+    status: string;
+    isUrgent: boolean;
+    quantity: number;
+    unit: string;
     location: {
-      city:  string
-      state: string
-    }
+      city: string;
+      state: string;
+    };
     owner: {
-      name: string
-    }
-    createdAt: string
-  }
+      name: string;
+    };
+    createdAt: string;
+  };
 }
 
 export default function ListingCard({ listing }: ListingCardProps) {
@@ -58,7 +57,9 @@ export default function ListingCard({ listing }: ListingCardProps) {
     >
       {/* Top row — category + urgent badge */}
       <div className="flex items-center justify-between mb-3">
-        <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${CATEGORY_COLORS[listing.category]}`}>
+        <span
+          className={`text-xs font-medium px-2.5 py-1 rounded-full border ${CATEGORY_COLORS[listing.category]}`}
+        >
           {CATEGORY_LABELS[listing.category]}
           {listing.bloodGroup && ` · ${listing.bloodGroup}`}
         </span>
@@ -86,7 +87,9 @@ export default function ListingCard({ listing }: ListingCardProps) {
           <MapPin className="w-3.5 h-3.5" />
           {listing.location.city}, {listing.location.state}
         </div>
-        <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLORS[listing.status]}`}>
+        <span
+          className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLORS[listing.status]}`}
+        >
           {listing.status}
         </span>
       </div>
@@ -101,5 +104,5 @@ export default function ListingCard({ listing }: ListingCardProps) {
         </span>
       </div>
     </Link>
-  )
+  );
 }

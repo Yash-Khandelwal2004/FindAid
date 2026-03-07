@@ -1,22 +1,22 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { X, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { toast } from "sonner"
+import { useState } from "react";
+import { X, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 interface BorrowModalProps {
   listing: {
-    _id:      string
-    title:    string
-    quantity: number
-    unit:     string
-  }
-  token:     string
-  onClose:   () => void
-  onSuccess: () => void
+    _id: string;
+    title: string;
+    quantity: number;
+    unit: string;
+  };
+  token: string;
+  onClose: () => void;
+  onSuccess: () => void;
 }
 
 export default function BorrowModal({
@@ -25,69 +25,65 @@ export default function BorrowModal({
   onClose,
   onSuccess,
 }: BorrowModalProps) {
-
-  const [quantity,    setQuantity]    = useState(1)
-  const [message,     setMessage]     = useState("")
-  const [phone,       setPhone]       = useState("")
-  const [urgency,     setUrgency]     = useState("medium")
-  const [needByDate,  setNeedByDate]  = useState("")
-  const [isLoading,   setIsLoading]   = useState(false)
+  const [quantity, setQuantity] = useState(1);
+  const [message, setMessage] = useState("");
+  const [phone, setPhone] = useState("");
+  const [urgency, setUrgency] = useState("medium");
+  const [needByDate, setNeedByDate] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const [errors, setErrors] = useState<{
-    quantity?: string
-    message?:  string
-    phone?:    string
-  }>({})
+    quantity?: string;
+    message?: string;
+    phone?: string;
+  }>({});
 
   function validate() {
-    const e: typeof errors = {}
-    if (!quantity || quantity < 1)
-      e.quantity = "Quantity must be at least 1"
+    const e: typeof errors = {};
+    if (!quantity || quantity < 1) e.quantity = "Quantity must be at least 1";
     if (quantity > listing.quantity)
-      e.quantity = `Maximum available is ${listing.quantity}`
-    if (!message.trim())
-      e.message = "Please explain your need"
-    if (!phone.trim())
-      e.phone = "Phone number is required"
-    setErrors(e)
-    return Object.keys(e).length === 0
+      e.quantity = `Maximum available is ${listing.quantity}`;
+    if (!message.trim()) e.message = "Please explain your need";
+    if (!phone.trim()) e.phone = "Phone number is required";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   }
 
   async function handleSubmit() {
-    if (!validate()) return
+    if (!validate()) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const res  = await fetch("/api/requests", {
-        method:  "POST",
+      const res = await fetch("/api/requests", {
+        method: "POST",
         headers: {
-          "Content-Type":  "application/json",
-          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          listingId:         listing._id,
+          listingId: listing._id,
           quantityRequested: quantity,
           message,
-          urgencyLevel:      urgency,
-          needByDate:        needByDate || undefined,
+          urgencyLevel: urgency,
+          needByDate: needByDate || undefined,
           requesterContact: {
             phone,
             preferredContact: "phone",
           },
         }),
-      })
-      const json = await res.json()
+      });
+      const json = await res.json();
 
       if (!json.success) {
-        toast.error(json.error)
-        return
+        toast.error(json.error);
+        return;
       }
 
-      onSuccess()
+      onSuccess();
     } catch {
-      toast.error("Failed to submit request")
+      toast.error("Failed to submit request");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -98,7 +94,6 @@ export default function BorrowModal({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bg-card border border-border rounded-xl p-6 w-full max-w-md">
-
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div>
@@ -116,7 +111,6 @@ export default function BorrowModal({
         </div>
 
         <div className="space-y-4">
-
           {/* Quantity */}
           <div className="space-y-1.5">
             <Label htmlFor="quantity">
@@ -132,8 +126,9 @@ export default function BorrowModal({
               max={listing.quantity}
               value={quantity}
               onChange={(e) => {
-                setQuantity(Number(e.target.value))
-                if (errors.quantity) setErrors({ ...errors, quantity: undefined })
+                setQuantity(Number(e.target.value));
+                if (errors.quantity)
+                  setErrors({ ...errors, quantity: undefined });
               }}
               className={errors.quantity ? "border-destructive" : ""}
             />
@@ -169,7 +164,9 @@ export default function BorrowModal({
           <div className="space-y-1.5">
             <Label htmlFor="needByDate">
               Need by
-              <span className="text-muted-foreground text-xs ml-1">(optional)</span>
+              <span className="text-muted-foreground text-xs ml-1">
+                (optional)
+              </span>
             </Label>
             <Input
               id="needByDate"
@@ -188,8 +185,8 @@ export default function BorrowModal({
               placeholder="9876543210"
               value={phone}
               onChange={(e) => {
-                setPhone(e.target.value)
-                if (errors.phone) setErrors({ ...errors, phone: undefined })
+                setPhone(e.target.value);
+                if (errors.phone) setErrors({ ...errors, phone: undefined });
               }}
               className={errors.phone ? "border-destructive" : ""}
             />
@@ -207,8 +204,9 @@ export default function BorrowModal({
               placeholder="Why do you need this item? Any relevant medical context..."
               value={message}
               onChange={(e) => {
-                setMessage(e.target.value)
-                if (errors.message) setErrors({ ...errors, message: undefined })
+                setMessage(e.target.value);
+                if (errors.message)
+                  setErrors({ ...errors, message: undefined });
               }}
               className={`w-full bg-input border rounded-lg px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring resize-none transition-colors ${
                 errors.message ? "border-destructive" : "border-border"
@@ -244,9 +242,8 @@ export default function BorrowModal({
               )}
             </Button>
           </div>
-
         </div>
       </div>
     </div>
-  )
+  );
 }

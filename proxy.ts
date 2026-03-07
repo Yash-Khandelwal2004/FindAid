@@ -2,29 +2,44 @@ import { getToken } from "next-auth/jwt"
 import { NextRequest, NextResponse } from "next/server"
 import { jwtVerify } from "jose"
 
-const PROTECTED_PAGES    = ["/dashboard", "/listings/new"]
+const PROTECTED_PAGES     = ["/dashboard", "/listings/new"]
 const PROTECTED_API_WRITE = ["/api/listings"]
-const PROTECTED_API_ALL  = ["/api/requests"]
-const AUTH_PAGES         = ["/login", "/register"]
+const PROTECTED_API_ALL   = ["/api/requests"]
+const AUTH_PAGES          = ["/login", "/register"]
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
 
-  // ── Read token from NextAuth cookie or Bearer header ───────────────
+  // ── 1. Try NextAuth cookie ─────────────────────────────────────────
   let token = await getToken({
     req,
     secret: process.env.NEXTAUTH_SECRET,
   })
 
+  // ── 2. Try Bearer header ───────────────────────────────────────────
   if (!token) {
     const authHeader = req.headers.get("authorization")
     if (authHeader?.startsWith("Bearer ")) {
       try {
-        const rawToken     = authHeader.split(" ")[1]
-        const secret       = new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
-        const { payload }  = await jwtVerify(rawToken, secret)
-        token              = payload as any
+        const rawToken    = authHeader.split(" ")[1]
+        const secret      = new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
+        const { payload } = await jwtVerify(rawToken, secret)
+        token             = payload as any
       } catch {
         // Invalid token — treat as not logged in
+      }
+    }
+  }
+
+  // ── 3. Try plain cookie (set by our custom login) ──────────────────
+  if (!token) {
+    const cookieToken = req.cookies.get("auth-token")?.value
+    if (cookieToken) {
+      try {
+        const secret      = new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
+        const { payload } = await jwtVerify(cookieToken, secret)
+        token             = payload as any
+      } catch {
+        // Invalid cookie token
       }
     }
   }
@@ -32,7 +47,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const isLoggedIn   = !!token
 
-  // ── 1. Protect pages ───────────────────────────────────────────────
+  // ── 4. Protect pages ───────────────────────────────────────────────
   const isProtectedPage = PROTECTED_PAGES.some((path) =>
     pathname.startsWith(path)
   )
@@ -43,12 +58,12 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // ── 2. Redirect logged in users away from auth pages ───────────────
+  // ── 5. Redirect logged-in users away from auth pages ──────────────
   if (isLoggedIn && AUTH_PAGES.includes(pathname)) {
     return NextResponse.redirect(new URL("/dashboard", req.url))
   }
 
-  // ── 3. Protect write API routes ────────────────────────────────────
+  // ── 6. Protect write API routes ────────────────────────────────────
   const isProtectedWriteApi = PROTECTED_API_WRITE.some((path) =>
     pathname.startsWith(path)
   )
@@ -60,7 +75,7 @@ export async function middleware(req: NextRequest) {
     )
   }
 
-  // ── 4. Protect all-method API routes ───────────────────────────────
+  // ── 7. Protect all-method API routes ───────────────────────────────
   const isProtectedAllApi = PROTECTED_API_ALL.some((path) =>
     pathname.startsWith(path)
   )
@@ -72,10 +87,7 @@ export async function middleware(req: NextRequest) {
     )
   }
 
-  // ── 5. Inject user ID header ───────────────────────────────────────
-  // token.id  → from our custom signin route
-  // token.sub → from NextAuth getToken()
-  // check both so either signin method works
+  // ── 8. Inject user ID header ───────────────────────────────────────
   const userId = (token?.id ?? token?.sub) as string | undefined
 
   if (isLoggedIn && userId) {

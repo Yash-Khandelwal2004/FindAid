@@ -6,7 +6,7 @@
 
 @theme inline {
 
-  /* ── Core colors ─────────────────────────────────────── */
+  /* ── Core colors  */
   --color-background:       #0f0f0f;
   --color-foreground:       #f0f0f0;
   --color-card:             #1a1a1a;
@@ -15,35 +15,35 @@
   --color-input:            #1a1a1a;
   --color-ring:             #c0392b;
 
-  /* ── Muted ───────────────────────────────────────────── */
+  /* ── Muted  */
   --color-muted:             #1a1a1a;
   --color-muted-foreground:  #888888;
 
-  /* ── Primary ─────────────────────────────────────────── */
+  /* ── Primary  */
   --color-primary:            #f0f0f0;
   --color-primary-foreground: #0f0f0f;
 
-  /* ── Secondary ───────────────────────────────────────── */
+  /* ── Secondary  */
   --color-secondary:            #242424;
   --color-secondary-foreground: #f0f0f0;
 
-  /* ── Destructive (our accent red) ────────────────────── */
+  /* ── Destructive  */
   --color-destructive:            #c0392b;
   --color-destructive-foreground: #f0f0f0;
 
-  /* ── Popover ─────────────────────────────────────────── */
+  /* ── Popover  */
   --color-popover:            #1a1a1a;
   --color-popover-foreground: #f0f0f0;
 
-  /* ── Accent ──────────────────────────────────────────── */
+  /* ── Accent  */
   --color-accent:            #242424;
   --color-accent-foreground: #f0f0f0;
 
-  /* ── Status colors ───────────────────────────────────── */
+  /* ── Status colors  */
   --color-success: #27ae60;
   --color-warning: #f39c12;
 
-  /* ── Radius ──────────────────────────────────────────── */
+  /* ── Radius  */
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
@@ -63,7 +63,7 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* ── Scrollbar ───────────────────────────────────────── */
+  /* ── Scrollbar  */
   ::-webkit-scrollbar {
     width: 6px;
   }
@@ -84,7 +84,7 @@
 
 @layer components {
 
-  /* ── Card ────────────────────────────────────────────── */
+  /* ── Card  */
   .card {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
@@ -92,7 +92,7 @@
     padding: 1.5rem;
   }
 
-  /* ── Input ───────────────────────────────────────────── */
+  /* ── Input  */
   .input {
     width: 100%;
     background-color: var(--color-input);
@@ -112,7 +112,7 @@
     border-color: var(--color-destructive);
   }
 
-  /* ── Buttons ─────────────────────────────────────────── */
+  /* ── Buttons  */
   .btn-primary {
     background-color: var(--color-destructive);
     color: var(--color-destructive-foreground);

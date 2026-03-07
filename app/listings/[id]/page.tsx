@@ -1,64 +1,70 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
-  MapPin, Phone, Clock, Package,
-  AlertCircle, ArrowLeft, Loader2, User
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
-import { useAuth } from "@/hooks/useAuth"
-import { formatDate, formatRelativeTime } from "@/lib/utils"
-import BorrowModal from "@/components/request/BorrowModal"
+  MapPin,
+  Phone,
+  Clock,
+  Package,
+  AlertCircle,
+  ArrowLeft,
+  Loader2,
+  User,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { formatDate, formatRelativeTime } from "@/lib/utils";
+import BorrowModal from "@/components/request/BorrowModal";
 
 const CATEGORY_COLORS: Record<string, string> = {
-  blood:       "bg-red-500/10 text-red-400 border-red-500/20",
-  oxygen:      "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  wheelchair:  "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  medicine:    "bg-green-500/10 text-green-400 border-green-500/20",
-  equipment:   "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  other:       "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
-}
+  blood: "bg-red-500/10 text-red-400 border-red-500/20",
+  oxygen: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  wheelchair: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  medicine: "bg-green-500/10 text-green-400 border-green-500/20",
+  equipment: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+  other: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+};
 
 const STATUS_COLORS: Record<string, string> = {
-  available:   "bg-green-500/10 text-green-400 border-green-500/20",
-  borrowed:    "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+  available: "bg-green-500/10 text-green-400 border-green-500/20",
+  borrowed: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
   unavailable: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
-}
+};
 
 export default function ListingDetailPage() {
-  const params              = useParams()
-  const router              = useRouter()
-  const { user, token, isLoggedIn } = useAuth()
+  const params = useParams();
+  const router = useRouter();
+  const { user, token, isLoggedIn } = useAuth();
 
-  const [listing,    setListing]    = useState<any>(null)
-  const [isLoading,  setIsLoading]  = useState(true)
-  const [showBorrow, setShowBorrow] = useState(false)
+  const [listing, setListing] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showBorrow, setShowBorrow] = useState(false);
 
   useEffect(() => {
     async function fetchListing() {
       try {
-        const res  = await fetch(`/api/listings/${params.id}`)
-        const json = await res.json()
+        const res = await fetch(`/api/listings/${params.id}`);
+        const json = await res.json();
 
         if (!json.success) {
-          toast.error(json.error)
-          router.push("/listings")
-          return
+          toast.error(json.error);
+          router.push("/listings");
+          return;
         }
 
-        setListing(json.data)
+        setListing(json.data);
       } catch {
-        toast.error("Failed to load listing")
-        router.push("/listings")
+        toast.error("Failed to load listing");
+        router.push("/listings");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
 
-    if (params.id) fetchListing()
-  }, [params.id])
+    if (params.id) fetchListing();
+  }, [params.id]);
 
   if (isLoading) {
     return (
@@ -69,17 +75,16 @@ export default function ListingDetailPage() {
           <div className="h-48 bg-card rounded" />
         </div>
       </div>
-    )
+    );
   }
 
-  if (!listing) return null
+  if (!listing) return null;
 
-  const isOwner     = user?.id === listing.owner._id
-  const canBorrow   = isLoggedIn && !isOwner && listing.status === "available"
+  const isOwner = user?.id === listing.owner._id;
+  const canBorrow = isLoggedIn && !isOwner && listing.status === "available";
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-
       {/* Back button */}
       <button
         onClick={() => router.back()}
@@ -90,20 +95,21 @@ export default function ListingDetailPage() {
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
         {/* ── Main content */}
         <div className="lg:col-span-2 space-y-6">
-
           {/* Header card */}
           <div className="bg-card border border-border rounded-xl p-6">
-
             {/* Badges row */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${CATEGORY_COLORS[listing.category]}`}>
+              <span
+                className={`text-xs font-medium px-2.5 py-1 rounded-full border ${CATEGORY_COLORS[listing.category]}`}
+              >
                 {listing.category}
                 {listing.bloodGroup && ` · ${listing.bloodGroup}`}
               </span>
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${STATUS_COLORS[listing.status]}`}>
+              <span
+                className={`text-xs font-medium px-2.5 py-1 rounded-full border ${STATUS_COLORS[listing.status]}`}
+              >
                 {listing.status}
               </span>
               {listing.isUrgent && (
@@ -121,7 +127,8 @@ export default function ListingDetailPage() {
             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
               <span className="flex items-center gap-1.5">
                 <Package className="w-4 h-4" />
-                {listing.quantity} {listing.unit} · {listing.condition} condition
+                {listing.quantity} {listing.unit} · {listing.condition}{" "}
+                condition
               </span>
               <span className="flex items-center gap-1.5">
                 <MapPin className="w-4 h-4" />
@@ -137,7 +144,6 @@ export default function ListingDetailPage() {
             <p className="text-muted-foreground text-sm leading-relaxed">
               {listing.description}
             </p>
-
           </div>
 
           {/* Location card */}
@@ -145,7 +151,10 @@ export default function ListingDetailPage() {
             <h2 className="font-medium mb-3">Location</h2>
             <div className="text-sm text-muted-foreground space-y-1">
               <p>{listing.location.address}</p>
-              <p>{listing.location.city}, {listing.location.state} — {listing.location.pincode}</p>
+              <p>
+                {listing.location.city}, {listing.location.state} —{" "}
+                {listing.location.pincode}
+              </p>
             </div>
           </div>
 
@@ -165,12 +174,10 @@ export default function ListingDetailPage() {
               </div>
             </div>
           )}
-
         </div>
 
-        {/* ── Sidebar ───────────────────────────────────────────────── */}
+        {/* ── Sidebar  */}
         <div className="space-y-4">
-
           {/* Borrow card */}
           <div className="bg-card border border-border rounded-xl p-6">
             <h2 className="font-medium mb-4">Request this item</h2>
@@ -182,7 +189,9 @@ export default function ListingDetailPage() {
                 </p>
                 <Button
                   className="w-full"
-                  onClick={() => router.push(`/login?callbackUrl=/listings/${listing._id}`)}
+                  onClick={() =>
+                    router.push(`/login?callbackUrl=/listings/${listing._id}`)
+                  }
                 >
                   Sign in to borrow
                 </Button>
@@ -196,10 +205,7 @@ export default function ListingDetailPage() {
                 This item is currently {listing.status}
               </p>
             ) : (
-              <Button
-                className="w-full"
-                onClick={() => setShowBorrow(true)}
-              >
+              <Button className="w-full" onClick={() => setShowBorrow(true)}>
                 Request to Borrow
               </Button>
             )}
@@ -223,7 +229,8 @@ export default function ListingDetailPage() {
               <div>
                 <p className="text-sm font-medium">{listing.owner.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {listing.owner.location?.city}, {listing.owner.location?.state}
+                  {listing.owner.location?.city},{" "}
+                  {listing.owner.location?.state}
                 </p>
               </div>
             </div>
@@ -234,7 +241,6 @@ export default function ListingDetailPage() {
               </div>
             )}
           </div>
-
         </div>
       </div>
 
@@ -245,12 +251,11 @@ export default function ListingDetailPage() {
           token={token!}
           onClose={() => setShowBorrow(false)}
           onSuccess={() => {
-            setShowBorrow(false)
-            toast.success("Borrow request submitted!")
+            setShowBorrow(false);
+            toast.success("Borrow request submitted!");
           }}
         />
       )}
-
     </div>
-  )
+  );
 }

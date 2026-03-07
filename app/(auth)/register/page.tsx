@@ -1,113 +1,102 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Heart, Loader2, Eye, EyeOff } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { toast } from "sonner"
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Heart, Loader2, Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
-  const router = useRouter()
+  const router = useRouter();
 
-  // Form fields
-  const [name,     setName]     = useState("")
-  const [email,    setEmail]    = useState("")
-  const [phone,    setPhone]    = useState("")
-  const [city,     setCity]     = useState("")
-  const [state,    setState]    = useState("")
-  const [password, setPassword] = useState("")
-  const [confirm,  setConfirm]  = useState("")
-  const [showPass, setShowPass] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [errors, setErrors] = useState<{
-    name?:     string
-    email?:    string
-    phone?:    string
-    city?:     string
-    state?:    string
-    password?: string
-    confirm?:  string
-  }>({})
+    name?: string;
+    email?: string;
+    phone?: string;
+    city?: string;
+    state?: string;
+    password?: string;
+    confirm?: string;
+  }>({});
 
   function validate() {
-    const e: typeof errors = {}
+    const e: typeof errors = {};
 
-    if (!name.trim())
-      e.name = "Name is required"
+    if (!name.trim()) e.name = "Name is required";
 
-    if (!email)
-      e.email = "Email is required"
+    if (!email) e.email = "Email is required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      e.email = "Enter a valid email address"
+      e.email = "Enter a valid email address";
 
-    if (!password)
-      e.password = "Password is required"
+    if (!password) e.password = "Password is required";
     else if (password.length < 8)
-      e.password = "Password must be at least 8 characters"
+      e.password = "Password must be at least 8 characters";
 
-    if (!confirm)
-      e.confirm = "Please confirm your password"
-    else if (confirm !== password)
-      e.confirm = "Passwords do not match"
+    if (!confirm) e.confirm = "Please confirm your password";
+    else if (confirm !== password) e.confirm = "Passwords do not match";
 
-    if (!city.trim())
-      e.city = "City is required"
+    if (!city.trim()) e.city = "City is required";
 
-    if (!state.trim())
-      e.state = "State is required"
+    if (!state.trim()) e.state = "State is required";
 
-    setErrors(e)
-    return Object.keys(e).length === 0
+    setErrors(e);
+    return Object.keys(e).length === 0;
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!validate()) return
+    e.preventDefault();
+    if (!validate()) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const res  = await fetch("/api/auth/register", {
-        method:  "POST",
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name:     name.trim(),
+          name: name.trim(),
           email,
           password,
-          phone:    phone.trim(),
-          city:     city.trim(),
-          state:    state.trim(),
+          phone: phone.trim(),
+          city: city.trim(),
+          state: state.trim(),
         }),
-      })
-      const json = await res.json()
+      });
+      const json = await res.json();
 
       if (!json.success) {
-        toast.error(json.error)
-        return
+        toast.error(json.error);
+        return;
       }
 
-      toast.success("Account created! Please sign in.")
+      toast.success("Account created! Please sign in.");
 
-      // Redirect to login after successful registration
-      router.push("/login")
-
+      router.push("/login");
     } catch {
-      toast.error("Something went wrong. Please try again.")
+      toast.error("Something went wrong. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   function clearError(field: keyof typeof errors) {
-    if (errors[field]) setErrors({ ...errors, [field]: undefined })
+    if (errors[field]) setErrors({ ...errors, [field]: undefined });
   }
 
   return (
     <div className="w-full max-w-md">
-
       {/* Logo */}
       <div className="text-center mb-8">
         <div className="flex justify-center mb-4">
@@ -126,7 +115,6 @@ export default function RegisterPage() {
       {/* Card */}
       <div className="bg-card border border-border rounded-xl p-6 space-y-5">
         <form onSubmit={handleSubmit} className="space-y-4">
-
           {/* Name */}
           <div className="space-y-1.5">
             <Label htmlFor="name">Full name</Label>
@@ -134,7 +122,10 @@ export default function RegisterPage() {
               id="name"
               placeholder="Rahul Sharma"
               value={name}
-              onChange={(e) => { setName(e.target.value); clearError("name") }}
+              onChange={(e) => {
+                setName(e.target.value);
+                clearError("name");
+              }}
               className={errors.name ? "border-destructive" : ""}
               disabled={isLoading}
             />
@@ -151,7 +142,10 @@ export default function RegisterPage() {
               type="email"
               placeholder="rahul@example.com"
               value={email}
-              onChange={(e) => { setEmail(e.target.value); clearError("email") }}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                clearError("email");
+              }}
               className={errors.email ? "border-destructive" : ""}
               disabled={isLoading}
             />
@@ -164,7 +158,9 @@ export default function RegisterPage() {
           <div className="space-y-1.5">
             <Label htmlFor="phone">
               Phone
-              <span className="text-muted-foreground text-xs ml-1">(optional)</span>
+              <span className="text-muted-foreground text-xs ml-1">
+                (optional)
+              </span>
             </Label>
             <Input
               id="phone"
@@ -184,7 +180,10 @@ export default function RegisterPage() {
                 id="city"
                 placeholder="Mumbai"
                 value={city}
-                onChange={(e) => { setCity(e.target.value); clearError("city") }}
+                onChange={(e) => {
+                  setCity(e.target.value);
+                  clearError("city");
+                }}
                 className={errors.city ? "border-destructive" : ""}
                 disabled={isLoading}
               />
@@ -198,7 +197,10 @@ export default function RegisterPage() {
                 id="state"
                 placeholder="Maharashtra"
                 value={state}
-                onChange={(e) => { setState(e.target.value); clearError("state") }}
+                onChange={(e) => {
+                  setState(e.target.value);
+                  clearError("state");
+                }}
                 className={errors.state ? "border-destructive" : ""}
                 disabled={isLoading}
               />
@@ -217,8 +219,13 @@ export default function RegisterPage() {
                 type={showPass ? "text" : "password"}
                 placeholder="Min. 8 characters"
                 value={password}
-                onChange={(e) => { setPassword(e.target.value); clearError("password") }}
-                className={errors.password ? "border-destructive pr-10" : "pr-10"}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  clearError("password");
+                }}
+                className={
+                  errors.password ? "border-destructive pr-10" : "pr-10"
+                }
                 disabled={isLoading}
               />
               <button
@@ -226,10 +233,11 @@ export default function RegisterPage() {
                 onClick={() => setShowPass(!showPass)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
-                {showPass
-                  ? <EyeOff className="w-4 h-4" />
-                  : <Eye    className="w-4 h-4" />
-                }
+                {showPass ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
             {errors.password && (
@@ -245,7 +253,10 @@ export default function RegisterPage() {
               type={showPass ? "text" : "password"}
               placeholder="Re-enter your password"
               value={confirm}
-              onChange={(e) => { setConfirm(e.target.value); clearError("confirm") }}
+              onChange={(e) => {
+                setConfirm(e.target.value);
+                clearError("confirm");
+              }}
               className={errors.confirm ? "border-destructive" : ""}
               disabled={isLoading}
             />
@@ -255,11 +266,7 @@ export default function RegisterPage() {
           </div>
 
           {/* Submit */}
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -269,7 +276,6 @@ export default function RegisterPage() {
               "Create account"
             )}
           </Button>
-
         </form>
 
         {/* Divider */}
@@ -287,8 +293,7 @@ export default function RegisterPage() {
         <Button asChild variant="outline" className="w-full">
           <Link href="/login">Sign in instead</Link>
         </Button>
-
       </div>
     </div>
-  )
+  );
 }

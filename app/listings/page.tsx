@@ -1,82 +1,83 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
-import { Search, SlidersHorizontal, X } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import ListingCard from "@/components/listing/ListingCard"
+import { useState, useEffect, useCallback } from "react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import ListingCard from "@/components/listing/ListingCard";
 
 const CATEGORIES = [
-  { value: "",           label: "All"         },
-  { value: "blood",      label: "Blood"       },
-  { value: "oxygen",     label: "Oxygen"      },
-  { value: "wheelchair", label: "Wheelchair"  },
-  { value: "medicine",   label: "Medicine"    },
-  { value: "equipment",  label: "Equipment"   },
-  { value: "other",      label: "Other"       },
-]
+  { value: "", label: "All" },
+  { value: "blood", label: "Blood" },
+  { value: "oxygen", label: "Oxygen" },
+  { value: "wheelchair", label: "Wheelchair" },
+  { value: "medicine", label: "Medicine" },
+  { value: "equipment", label: "Equipment" },
+  { value: "other", label: "Other" },
+];
 
-const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 export default function ListingsPage() {
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
+  const [bloodGroup, setBloodGroup] = useState("");
+  const [city, setCity] = useState("");
+  const [isUrgent, setIsUrgent] = useState(false);
 
-  const [search,     setSearch]     = useState("")
-  const [category,   setCategory]   = useState("")
-  const [bloodGroup, setBloodGroup] = useState("")
-  const [city,       setCity]       = useState("")
-  const [isUrgent,   setIsUrgent]   = useState(false)
+  const [listings, setListings] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [listings,   setListings]   = useState<any[]>([])
-  const [total,      setTotal]      = useState(0)
-  const [page,       setPage]       = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [isLoading,  setIsLoading]  = useState(true)
+  const fetchListings = useCallback(
+    async (currentPage = 1) => {
+      setIsLoading(true);
+      try {
+        const params = new URLSearchParams();
+        if (search) params.set("search", search);
+        if (category) params.set("category", category);
+        if (bloodGroup) params.set("bloodGroup", bloodGroup);
+        if (city) params.set("city", city);
+        if (isUrgent) params.set("isUrgent", "true");
+        params.set("page", currentPage.toString());
+        params.set("limit", "12");
 
-  const fetchListings = useCallback(async (currentPage = 1) => {
-    setIsLoading(true)
-    try {
-      const params = new URLSearchParams()
-      if (search)     params.set("search",     search)
-      if (category)   params.set("category",   category)
-      if (bloodGroup) params.set("bloodGroup", bloodGroup)
-      if (city)       params.set("city",       city)
-      if (isUrgent)   params.set("isUrgent",   "true")
-      params.set("page",  currentPage.toString())
-      params.set("limit", "12")
+        const res = await fetch(`/api/listings?${params.toString()}`);
+        const json = await res.json();
 
-      const res  = await fetch(`/api/listings?${params.toString()}`)
-      const json = await res.json()
-
-      if (json.success) {
-        setListings(json.data.listings)
-        setTotal(json.data.pagination.total)
-        setTotalPages(json.data.pagination.totalPages)
-        setPage(currentPage)
+        if (json.success) {
+          setListings(json.data.listings);
+          setTotal(json.data.pagination.total);
+          setTotalPages(json.data.pagination.totalPages);
+          setPage(currentPage);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [search, category, bloodGroup, city, isUrgent])
+    },
+    [search, category, bloodGroup, city, isUrgent],
+  );
 
   useEffect(() => {
-    fetchListings(1)
-  }, [fetchListings])
+    fetchListings(1);
+  }, [fetchListings]);
 
   function clearFilters() {
-    setSearch("")
-    setCategory("")
-    setBloodGroup("")
-    setCity("")
-    setIsUrgent(false)
+    setSearch("");
+    setCategory("");
+    setBloodGroup("");
+    setCity("");
+    setIsUrgent(false);
   }
 
-  const hasActiveFilters = search || category || bloodGroup || city || isUrgent
+  const hasActiveFilters = search || category || bloodGroup || city || isUrgent;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-
       {/* Page header */}
       <div className="mb-8">
         <h1 className="text-2xl font-semibold mb-1">Browse Aid</h1>
@@ -98,7 +99,6 @@ export default function ListingsPage() {
 
       {/* Filters row */}
       <div className="flex flex-wrap items-center gap-2 mb-6">
-
         {/* Category filter */}
         {CATEGORIES.map((cat) => (
           <button
@@ -146,7 +146,9 @@ export default function ListingsPage() {
           >
             <option value="">All groups</option>
             {BLOOD_GROUPS.map((bg) => (
-              <option key={bg} value={bg}>{bg}</option>
+              <option key={bg} value={bg}>
+                {bg}
+              </option>
             ))}
           </select>
         )}
@@ -221,5 +223,5 @@ export default function ListingsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }
