@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { connectDB } from "@/lib/connectDB"
 import Listing from "@/models/Listing"
+import "@/lib/models"  
 import { apiSuccess, apiError, getPagination } from "@/lib/utils"
 
 export async function GET(req: NextRequest) {

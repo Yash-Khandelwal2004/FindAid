@@ -1,26 +1,149 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* ── Core colors ─────────────────────────────────────── */
+  --color-background:       #0f0f0f;
+  --color-foreground:       #f0f0f0;
+  --color-card:             #1a1a1a;
+  --color-card-foreground:  #f0f0f0;
+  --color-border:           #2a2a2a;
+  --color-input:            #1a1a1a;
+  --color-ring:             #c0392b;
+
+  /* ── Muted ───────────────────────────────────────────── */
+  --color-muted:             #1a1a1a;
+  --color-muted-foreground:  #888888;
+
+  /* ── Primary ─────────────────────────────────────────── */
+  --color-primary:            #f0f0f0;
+  --color-primary-foreground: #0f0f0f;
+
+  /* ── Secondary ───────────────────────────────────────── */
+  --color-secondary:            #242424;
+  --color-secondary-foreground: #f0f0f0;
+
+  /* ── Destructive (our accent red) ────────────────────── */
+  --color-destructive:            #c0392b;
+  --color-destructive-foreground: #f0f0f0;
+
+  /* ── Popover ─────────────────────────────────────────── */
+  --color-popover:            #1a1a1a;
+  --color-popover-foreground: #f0f0f0;
+
+  /* ── Accent ──────────────────────────────────────────── */
+  --color-accent:            #242424;
+  --color-accent-foreground: #f0f0f0;
+
+  /* ── Status colors ───────────────────────────────────── */
+  --color-success: #27ae60;
+  --color-warning: #f39c12;
+
+  /* ── Radius ──────────────────────────────────────────── */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--color-border);
+    outline-color: var(--color-ring);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ── Scrollbar ───────────────────────────────────────── */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-background);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted-foreground);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+
+  /* ── Card ────────────────────────────────────────────── */
+  .card {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+  }
+
+  /* ── Input ───────────────────────────────────────────── */
+  .input {
+    width: 100%;
+    background-color: var(--color-input);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 0.625rem 1rem;
+    color: var(--color-foreground);
+    transition: border-color 0.2s;
+  }
+
+  .input::placeholder {
+    color: var(--color-muted-foreground);
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: var(--color-destructive);
+  }
+
+  /* ── Buttons ─────────────────────────────────────────── */
+  .btn-primary {
+    background-color: var(--color-destructive);
+    color: var(--color-destructive-foreground);
+    padding: 0.625rem 1rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    transition: opacity 0.2s;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.9;
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-ghost {
+    background-color: transparent;
+    color: var(--color-foreground);
+    padding: 0.625rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    font-weight: 500;
+    transition: background-color 0.2s;
+    cursor: pointer;
+  }
+
+  .btn-ghost:hover {
+    background-color: var(--color-secondary);
+  }
 }

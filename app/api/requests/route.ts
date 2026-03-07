@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { connectDB } from "@/lib/connectDB"
+import "@/lib/models"  
 import BorrowRequest from "@/models/BorrowRequest"
 import Listing from "@/models/Listing"
 import { apiSuccess, apiError } from "@/lib/utils"
