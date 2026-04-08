@@ -70,7 +70,7 @@ export async function PATCH(
     }
 
     // ── Validate transition ───────────────────────────────────────────
-    const allowedNext = TRANSITIONS[request.status].next;
+    const allowedNext = TRANSITIONS[request.status as keyof typeof TRANSITIONS].next;
     if (!allowedNext.includes(newStatus)) {
       return NextResponse.json(
         apiError(`Cannot move from "${request.status}" to "${newStatus}"`),
