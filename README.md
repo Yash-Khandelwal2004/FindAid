@@ -97,7 +97,7 @@ findaid/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/findaid.git
+git clone https://github.com/Yash-Khandelwal2004/FindAid.git
 cd findaid
 
 # Install dependencies
